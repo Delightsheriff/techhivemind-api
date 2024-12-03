@@ -13,6 +13,11 @@ export const ENVIRONMENT: IEnvironment = {
     URL: process.env.CLIENT_URL!,
   },
   DB: {
-    URL: process.env.MONGO_URL!,
+    URI: process.env.MONGO_URI!,
+  },
+  REDIS: {
+    PASSWORD: process.env.REDIS_PASSWORD!,
+    PORT: parseInt(process.env.REDIS_PORT!),
+    HOST: process.env.REDIS_HOST!,
   },
 };

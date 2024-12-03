@@ -11,7 +11,7 @@ import { logger } from "../utils/logger";
  */
 export const connectDB = async (): Promise<void> => {
   try {
-    const conn = await mongoose.connect(ENVIRONMENT.DB.URL);
+    const conn = await mongoose.connect(ENVIRONMENT.DB.URI);
     logger.info(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     logger.error("Error connecting to MongoDB: ", error);

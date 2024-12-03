@@ -9,6 +9,11 @@ export interface IEnvironment {
     URL?: string;
   };
   DB: {
-    URL: string;
+    URI: string;
+  };
+  REDIS: {
+    PASSWORD: string;
+    PORT: number;
+    HOST: string;
   };
 }
