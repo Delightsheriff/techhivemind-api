@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { User } from "../../models/User";
 import { createError } from "../../common/utils/error";
 import { generateTOTP } from "../../common/utils/otp";
 import { sendOTPEmail } from "../../common/services/email.service";
-import { generateTokens } from "../../common/utils/token";
+import { generateTokens, verifyToken } from "../../common/utils/token";
 import { setCache } from "../../common/utils/caching";
+import { ENVIRONMENT } from "../../common/config/environment";
 
 export const signUp = async (req: Request, res: Response) => {
   try {
@@ -129,5 +130,55 @@ export const signIn = async (req: Request, res: Response) => {
     res.status(error.status || 500).json({
       error: error.message || "Internal server error",
     });
+  }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return next(createError(401, "Refresh token is required"));
+    }
+
+    // Verify the refresh token using the REFRESH secret
+    const decoded = verifyToken(refreshToken, ENVIRONMENT.JWT.REFRESH);
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return next(createError(401, "User not found"));
+    }
+
+    // Generate new access and refresh tokens
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      generateTokens(user);
+
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    res.status(200).json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      message: "Refresh token successful",
+    });
+  } catch (error: any) {
+    if (error.name === "TokenExpiredError") {
+      return next(createError(401, "Token has expired"));
+    }
+    if (error.name === "JsonWebTokenError") {
+      return next(createError(401, "Invalid token"));
+    }
+
+    // Propagate other errors
+    next(
+      createError(
+        error.status || 500,
+        error.message || "Internal server error",
+      ),
+    );
   }
 };
