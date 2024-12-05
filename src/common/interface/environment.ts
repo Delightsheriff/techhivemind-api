@@ -16,4 +16,8 @@ export interface IEnvironment {
     PORT: number;
     HOST: string;
   };
+  EMAIL: {
+    USER: string;
+    PASSWORD: string;
+  };
 }
