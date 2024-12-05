@@ -20,4 +20,8 @@ export interface IEnvironment {
     USER: string;
     PASSWORD: string;
   };
+  JWT: {
+    ACCESS: string;
+    REFRESH: string;
+  };
 }

@@ -24,4 +24,8 @@ export const ENVIRONMENT: IEnvironment = {
     USER: process.env.USER_EMAIL!,
     PASSWORD: process.env.USER_PASSWORD!,
   },
+  JWT: {
+    ACCESS: process.env.JWT_SECRET!,
+    REFRESH: process.env.JWT_REFRESH_SECRET!,
+  },
 };
