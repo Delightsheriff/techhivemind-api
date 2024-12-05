@@ -5,15 +5,16 @@ export const validateSignup = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): void => {
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
 
   if (error) {
     const errors = error.details.map((detail) => detail.message);
-    return res.status(400).json({ errors });
+    res.status(400).json({ errors });
+    return; // Ensure the function ends here to avoid calling next()
   }
 
-  next();
+  next(); // Call next() only if validation succeeds
 };
 
 export const validateSignin = (
@@ -25,8 +26,9 @@ export const validateSignin = (
 
   if (error) {
     const errors = error.details.map((detail) => detail.message);
-    return res.status(400).json({ errors });
+    res.status(400).json({ errors });
+    return; // Ensure the function ends here to avoid calling next()
   }
 
-  next();
+  next(); // Call next() only if validation succeeds
 };
