@@ -14,7 +14,7 @@ const userSchema = new Schema<IUser>(
       trim: true,
       lowercase: true,
     },
-    password: { type: String, required: true, minlength: 8 },
+    password: { type: String, required: true, minlength: 8, select: false },
     isVerified: { type: Boolean, default: false },
     accountType: {
       type: String,
