@@ -7,6 +7,12 @@ export const signupLimiter = rateLimit({
     "Too many accounts created from this IP, please try again after 15 minutes",
 });
 
+export const otpRateLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 1, // limit each IP to 1 request per windowMs
+  message: "Too many OTP requests, please try again after a minute",
+});
+
 export const signinLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 attempts
