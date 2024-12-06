@@ -15,7 +15,7 @@ export const sendOTPEmail = async (email: string, otp: string) => {
                 <h2 style="color: #3498db; text-align: center;">Email Verification OTP</h2>
                 <p style="font-size: 16px;">Hello,</p>
                 <p style="font-size: 16px;">Your One-Time Password (OTP) for email verification is:</p>
-                <p style="font-size: 24px; font-weight: bold; text-align: center; color: #2c3e50; background-color: #ecf0f1; padding: 10px; border-radius: 5px;">{OTP}</p>
+                <p style="font-size: 24px; font-weight: bold; text-align: center; color: #2c3e50; background-color: #ecf0f1; padding: 10px; border-radius: 5px;">${otp}</p>
                 <p style="font-size: 16px;">This OTP is valid for 10 minutes. Please do not share this code with anyone.</p>
                 <p style="font-size: 16px;">If you didn't request this OTP, please ignore this email.</p>
                 <p style="font-size: 16px;">Best regards,<br>The TechHiveMind Team</p>

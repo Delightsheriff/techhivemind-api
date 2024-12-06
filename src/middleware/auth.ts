@@ -23,9 +23,9 @@ export const protect = async (
     const token = authHeader.split(" ")[1];
     const decoded = verifyToken(token, ENVIRONMENT.JWT.ACCESS);
 
-    const user = await User.findById(decoded.id).select("-password");
+    const user = await User.findById(decoded._id).select("-password");
     if (!user) {
-      return next(createError(404, "User not found"));
+      return next(createError(404, "User not found -ty"));
     }
 
     req.user = user.toObject();

@@ -1,4 +1,5 @@
 import client from "../config/redis";
+import { logger } from "./logger";
 
 /**
  * Set a value in the Redis cache.
@@ -12,10 +13,19 @@ export const setCache = async (
   expirationInSeconds?: number,
 ): Promise<void> => {
   const stringValue = typeof value === "string" ? value : JSON.stringify(value);
-  if (expirationInSeconds) {
-    await client.setEx(key, expirationInSeconds, stringValue);
-  } else {
-    await client.set(key, stringValue);
+
+  try {
+    if (expirationInSeconds) {
+      await client.setEx(key, expirationInSeconds, stringValue);
+    } else {
+      await client.set(key, stringValue);
+    }
+    logger.info(`Cache set successfully for key: ${key}`);
+  } catch (error: any) {
+    logger.error(
+      `Failed to set cache for key: ${key}. Error: ${error.message}`,
+    );
+    throw error; // Optionally re-throw to handle it higher up
   }
 };
 

@@ -3,13 +3,13 @@ import { IUser } from "../interface/users";
 import { ENVIRONMENT } from "../config/environment";
 
 export interface TokenPayload {
-  id: string;
+  _id: string;
   email: string;
 }
 
 export const generateTokens = (user: IUser) => {
   const payload: TokenPayload = {
-    id: user._id as string,
+    _id: user._id as string,
     email: user.email,
   };
 

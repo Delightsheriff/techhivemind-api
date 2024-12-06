@@ -18,13 +18,13 @@ export const signupSchema = Joi.object({
   password: Joi.string()
     .pattern(
       new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&^#])[A-Za-z\\d@$!%*?&^#]{8,}$",
       ),
     )
     .required()
     .messages({
       "string.pattern.base":
-        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
       "string.empty": "Password is required",
     }),
 });

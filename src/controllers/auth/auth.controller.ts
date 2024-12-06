@@ -4,7 +4,7 @@ import { createError } from "../../common/utils/error";
 import { generateTOTP } from "../../common/utils/otp";
 import { sendOTPEmail } from "../../common/services/email.service";
 import { generateTokens, verifyToken } from "../../common/utils/token";
-import { getCache, setCache } from "../../common/utils/caching";
+import { deleteCache, getCache, setCache } from "../../common/utils/caching";
 import { ENVIRONMENT } from "../../common/config/environment";
 import { AuthRequest } from "../../middleware/auth";
 
@@ -50,10 +50,16 @@ export const verifyEmail = async (req: Request, res: Response) => {
     if (
       !user.emailVerificationOTP ||
       user.emailVerificationOTP.code !== otp ||
-      user.emailVerificationOTP.expiresAt < new Date()
+      new Date().getTime() > user.emailVerificationOTP.expiresAt.getTime()
     ) {
       throw createError(400, "Invalid or expired OTP");
     }
+    // Proceed with email verification logic
+    user.isVerified = true;
+    user.emailVerificationOTP = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully" });
   } catch (error: any) {
     res.status(error.status || 500).json({
       error: error.message || "Internal server error",
@@ -75,6 +81,7 @@ export const resendOTP = async (req: Request, res: Response) => {
       code,
       expiresAt,
     };
+    await user.save();
 
     // Send new OTP via email
     await sendOTPEmail(email, code);
@@ -119,7 +126,7 @@ export const signIn = async (req: Request, res: Response) => {
     const sanitizedUser = { ...user.toObject(), password: undefined };
 
     // Cache user data for future use
-    await setCache(`user:${user.id}`, sanitizedUser, 3600); // Cache for 1 hour
+    await setCache(`user:${user._id}`, sanitizedUser, 3600); // Cache for 1 hour
 
     res.status(200).json({
       accessToken,
@@ -149,9 +156,14 @@ export const refreshToken = async (
     // Verify the refresh token using the REFRESH secret
     const decoded = verifyToken(refreshToken, ENVIRONMENT.JWT.REFRESH);
 
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded._id);
     if (!user) {
       return next(createError(401, "User not found"));
+    }
+
+    // Check if the provided refresh token matches the one in the database
+    if (user.refreshToken !== refreshToken) {
+      return next(createError(403, "Invalid or expired refresh token"));
     }
 
     // Generate new access and refresh tokens
@@ -160,6 +172,15 @@ export const refreshToken = async (
 
     user.refreshToken = newRefreshToken;
     await user.save();
+
+    //remove old cache
+    await deleteCache(`user:${user._id}`);
+
+    // Sanitize user data (exclude sensitive fields)
+    const sanitizedUser = { ...user.toObject(), password: undefined };
+
+    // Cache user data for future use
+    await setCache(`user:${user._id}`, sanitizedUser, 3600); // Cache for 1 hour
 
     res.status(200).json({
       accessToken: newAccessToken,
@@ -186,7 +207,7 @@ export const refreshToken = async (
 
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?._id;
 
     // Check cache for user data
     let user = await getCache(`user:${userId}`);
