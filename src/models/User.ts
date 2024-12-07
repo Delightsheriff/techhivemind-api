@@ -16,6 +16,7 @@ const userSchema = new Schema<IUser>(
     },
     password: { type: String, required: true, minlength: 8, select: false },
     isVerified: { type: Boolean, default: false },
+    termsAccepted: { type: Boolean, default: false },
     accountType: {
       type: String,
       enum: ["customer", "vendor", "admin"],
