@@ -20,4 +20,12 @@ export const ENVIRONMENT: IEnvironment = {
     PORT: parseInt(process.env.REDIS_PORT!),
     HOST: process.env.REDIS_HOST!,
   },
+  EMAIL: {
+    USER: process.env.USER_EMAIL!,
+    PASSWORD: process.env.USER_PASSWORD!,
+  },
+  JWT: {
+    ACCESS: process.env.JWT_SECRET!,
+    REFRESH: process.env.JWT_REFRESH_SECRET!,
+  },
 };
