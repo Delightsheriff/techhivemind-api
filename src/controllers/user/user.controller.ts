@@ -62,6 +62,11 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const updateProfilePicture = async (
+  req: AuthRequest,
+  res: Response,
+) => {};
+
 export const becomeVendor = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?._id;
