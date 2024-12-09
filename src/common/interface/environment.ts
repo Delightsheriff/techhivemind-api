@@ -24,4 +24,9 @@ export interface IEnvironment {
     ACCESS: string;
     REFRESH: string;
   };
+  CLOUDINARY: {
+    NAME: string;
+    API_KEY: string;
+    API_SECRET: string;
+  };
 }

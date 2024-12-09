@@ -28,4 +28,9 @@ export const ENVIRONMENT: IEnvironment = {
     ACCESS: process.env.JWT_SECRET!,
     REFRESH: process.env.JWT_REFRESH_SECRET!,
   },
+  CLOUDINARY: {
+    NAME: process.env.CLOUDINARY_CLOUD_NAME!,
+    API_KEY: process.env.CLOUDINARY_API_KEY!,
+    API_SECRET: process.env.CLOUDINARY_API_SECRET!,
+  },
 };
