@@ -15,19 +15,22 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       throw createError(401, "Unauthorized, sign in again");
     }
 
-    // Attempt to get user data from cache
-    const cachedUser = await getCache(`user:${userId}`);
-    let user = cachedUser ? JSON.parse(cachedUser) : null;
+   // Attempt to get user data from cache
+   let user = await getCache(`user:${userId}`);
+  //  if (user) {
+  //   console.log("User data fetched from cache");
+  //  }
 
-    // Fetch from DB if not in cache
-    if (!user) {
-      user = await User.findById(userId);
-      if (!user) {
-        throw createError(404, "User not found");
-      }
-      // Cache the user object for future use
-      await setCache(`user:${userId}`, user, 3600);
-    }
+   // Fetch from DB if not in cache
+   if (!user) {
+     const dbUser = await User.findById(userId);
+     if (!dbUser) {
+       throw createError(404, "User not found");
+     }
+     // Cache the user object - setCache handles stringification
+     await setCache(`user:${userId}`, dbUser.toJSON(), 3600);
+     user =  dbUser;
+   }
 
     const updateData: Partial<IUser> = {};
     if (firstName !== undefined) updateData.firstName = firstName;
@@ -82,14 +85,18 @@ export const becomeVendor = async (req: AuthRequest, res: Response)  =>{
     
     }
 
-    // Retrieve user from cache or database
-    const cachedUser = await getCache(`user:${userId}`);
-    const user = cachedUser
-      ? JSON.parse(cachedUser)
-      : await User.findById(userId);
+    // Attempt to get user data from cache
+     let user = await getCache(`user:${userId}`);
 
+    // Fetch from DB if not in cache
     if (!user) {
-      throw createError(404, "User not found");
+      const dbUser = await User.findById(userId);
+      if (!dbUser) {
+        throw createError(404, "User not found");
+      }
+      // Cache the user object - setCache handles stringification
+      await setCache(`user:${userId}`, dbUser.toJSON(), 3600);
+      user =  dbUser;
     }
 
     if (user.accountType === "vendor") {
