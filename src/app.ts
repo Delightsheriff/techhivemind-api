@@ -5,6 +5,7 @@ import { apiLimiter } from "./middleware/rateLimiter";
 import ExpressMongoSanitize from "express-mongo-sanitize";
 import { logger } from "./common/utils/logger";
 import authRoutes from "./routes/auth.routes";
+import userRoutes from "./routes/user.routes";
 
 const app: Application = express();
 
@@ -33,6 +34,9 @@ app.get("/api/v1", (req: Request, res: Response) => {
 
 // auth routes
 app.use("/api/v1/auth", authRoutes);
+
+// user routes
+app.use("/api/v1/user", userRoutes);
 
 const catchAllHandler = (req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({
