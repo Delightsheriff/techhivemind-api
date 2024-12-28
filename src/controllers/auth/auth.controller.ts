@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { User } from "../../models/User";
 import { createError } from "../../common/utils/error";
 import { generateTOTP } from "../../common/utils/otp";
-import { sendOTPEmail } from "../../common/services/email.service";
+import { sendOTPEmail, sendWelcomeEmail } from "../../common/services/email.service";
 import { generateTokens, verifyToken } from "../../common/utils/token";
 import { deleteCache, getCache, setCache } from "../../common/utils/caching";
 import { ENVIRONMENT } from "../../common/config/environment";
@@ -59,6 +59,8 @@ export const verifyEmail = async (req: Request, res: Response) => {
     user.emailVerificationOTP = undefined;
     await user.save();
 
+    await sendWelcomeEmail(email, user.firstName);
+    
     res.status(200).json({ message: "Email verified successfully" });
   } catch (error: any) {
     res.status(error.status || 500).json({

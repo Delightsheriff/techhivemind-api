@@ -4,6 +4,7 @@ import { createError } from "../../common/utils/error";
 import { IUser } from "../../common/interface/users";
 import { User } from "../../models/User";
 import { getCache, deleteCache, setCache } from "../../common/utils/caching";
+import { sendWelcomeVendor } from "../../common/services/email.service";
 
 export const updateUser = async (req: AuthRequest, res: Response) => {
   try {
@@ -67,15 +68,21 @@ export const updateProfilePicture = async (
   res: Response,
 ) => {};
 
-export const becomeVendor = async (req: AuthRequest, res: Response) => {
+export const becomeVendor = async (req: AuthRequest, res: Response)  =>{
   try {
     const userId = req.user?._id;
+    const { termsAccepted } = req.body;
 
     if (!userId) {
       throw createError(401, "Unauthorized, please sign in");
     }
 
-    // Check Redis cache first
+    if (!termsAccepted) {
+      throw createError(400, "You must accept the terms and conditions to become a vendor");
+    
+    }
+
+    // Retrieve user from cache or database
     const cachedUser = await getCache(`user:${userId}`);
     const user = cachedUser
       ? JSON.parse(cachedUser)
@@ -86,33 +93,45 @@ export const becomeVendor = async (req: AuthRequest, res: Response) => {
     }
 
     if (user.accountType === "vendor") {
-      return res.status(400).json({ message: "You are already a vendor" });
+      throw createError(400, "You are already a vendor");
+      
     }
 
     if (user.accountType === "admin") {
-      return res.status(403).json({ message: "Admins cannot become vendors" });
+      throw createError(403, "Admins cannot become vendors");
+   
     }
 
-    // Update accountType to "vendor" and set termsAccepted to true
-    user.accountType = "vendor";
-    user.termsAccepted = true;
+    // Prepare update object
+    const updates = { accountType: "vendor", termsAccepted: true };
 
-    await User.findByIdAndUpdate(userId, user, {
+    // Update user in database
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, {
       new: true,
       runValidators: true,
     });
 
-    // Remove old cache and cache updated user
-    await deleteCache(`user:${userId}`);
-    await setCache(`user:${userId}`, user, 3600);
+    if (!updatedUser) {
+      throw createError(500, "Failed to update user");
+    }
 
+    // Update cache
+    await deleteCache(`user:${userId}`);
+    await setCache(`user:${userId}`, JSON.stringify(updatedUser), 3600);
+
+    // Send welcome email
+    await sendWelcomeVendor(updatedUser.email, updatedUser.firstName);
+
+    // Respond with success
     res.status(200).json({
       message: "Congratulations! You are now a vendor.",
-      data: { user },
+      data: { user: updatedUser },
     });
   } catch (error: any) {
+    console.error("Error in becomeVendor:", error);
     res.status(error.status || 500).json({
       error: error.message || "Internal server error",
     });
   }
 };
+
