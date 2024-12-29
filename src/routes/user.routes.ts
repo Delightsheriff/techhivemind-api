@@ -1,23 +1,26 @@
 import { Router } from "express";
 import { protect } from "../middleware/auth";
-import {  becomeVendor, updateProfilePicture, updateUser } from "../controllers/user/user.controller";
-import { upload } from "../common/utils/upload";
+import { updateProfilePicture } from "../controllers/user/updateProfilePicture";
+import { updateUser } from "../controllers/user/updateUser";
+import { becomeVendor } from "../controllers/user/becomeVendor";
+import upload from "../middleware/upload";
+
 
 
 const router = Router();
 
 router.post('/update-user', protect, updateUser)
 
-// router.post("/upload/profile",protect, upload.single("photo"),updateProfilePicture)
-router.post("/upload/profile", protect, (req, res, next) => {
-    upload.single("photo")(req, res, (err) => {
-      if (err) {
-        console.error('Multer error:', err);
-        return res.status(400).json({ error: err.message });
-      }
-      next();
-    });
-  }, updateProfilePicture);
+// router.post("/upload/profile",protect, upload.single("file"),updateProfilePicture)
+router.post('/upload', upload.single('file'), (req, res) => {
+    console.log('File:', req.file); // Log the file
+    console.log('Body:', req.body); // Log other form data
+    if (!req.file) {
+      res.status(400).send('No file uploaded.');
+    }
+    res.status(200).json({ file: req.file });
+  });
+
 
 router.post('/become-vendor', protect, becomeVendor)
 

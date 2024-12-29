@@ -5,14 +5,12 @@ import {
   signinLimiter,
   signupLimiter,
 } from "../middleware/rateLimiter";
-import {
-  getCurrentUser,
-  refreshToken,
-  resendOTP,
-  signIn,
-  signUp,
-  verifyEmail,
-} from "../controllers/auth/auth.controller";
+import { getCurrentUser } from "../controllers/auth/getCurrentUser";
+import { refreshToken } from "../controllers/auth/refreshToken";
+import { signIn } from "../controllers/auth/signIn";
+import { resendOTP } from "../controllers/auth/resendOTP";
+import { verifyEmail } from "../controllers/auth/verifyEmail";
+import { signUp } from "../controllers/auth/signUp";
 import { protect } from "../middleware/auth";
 
 const router = Router();

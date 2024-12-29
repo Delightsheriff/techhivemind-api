@@ -21,8 +21,8 @@ app.use(
 app.use(apiLimiter);
 
 //Body Parser Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
 app.use(ExpressMongoSanitize());
 
 // Routes

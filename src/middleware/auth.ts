@@ -7,10 +7,6 @@ import { User } from "../models/User";
 
 export interface AuthRequest extends Request {
   user?: IUser;
-  file?: Express.Multer.File; // Ensure this matches single-file uploads
-  files?:
-    | Express.Multer.File[]
-    | { [fieldname: string]: Express.Multer.File[] };
 }
 
 export const protect = async (
