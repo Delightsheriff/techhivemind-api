@@ -6,6 +6,7 @@ import ExpressMongoSanitize from "express-mongo-sanitize";
 import { logger } from "./common/utils/logger";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
+import { ENVIRONMENT } from "./common/config/environment";
 
 const app: Application = express();
 
@@ -28,7 +29,7 @@ app.use(ExpressMongoSanitize());
 app.get("/api/v1", (req: Request, res: Response) => {
   res.status(200).json({
     statusText: "success",
-    message: "Welcome to Home-finder API",
+    message: "Welcome to TechHiveMind API",
   });
 });
 
@@ -49,11 +50,24 @@ const catchAllHandler = (req: Request, res: Response, next: NextFunction) => {
 app.all("*", catchAllHandler);
 
 // Error Handler
+// Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error(err.stack);
-  res
-    .status(err.status || 500)
-    .json({ error: err.message || "Internal Server Error" });
+  
+  const statusCode = err.status || 500;
+  const message = err.message || "Internal Server Error";
+  
+  res.status(statusCode).json({
+    status: "error",
+    message: message,
+    ...(ENVIRONMENT.APP.ENV === "development" && { stack: err.stack }),
+  });
 });
+// app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+//   logger.error(err.stack);
+//   res
+//     .status(err.status || 500)
+//     .json({ error: err.message || "Internal Server Error" });
+// });
 
 export default app;

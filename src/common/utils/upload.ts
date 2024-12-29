@@ -1,68 +1,85 @@
 import { v2 as cloudinary } from "cloudinary";
 import { UploadApiOptions, UploadApiResponse } from "cloudinary";
+import multer from "multer";
 import { ENVIRONMENT } from "../config/environment";
 
+// Cloudinary configuration
 cloudinary.config({
   cloud_name: ENVIRONMENT.CLOUDINARY.NAME,
   api_key: ENVIRONMENT.CLOUDINARY.API_KEY,
   api_secret: ENVIRONMENT.CLOUDINARY.API_SECRET,
 });
 
-/**
- * Uploads a single profile photo to Cloudinary with optimization.
- * @param {string} filePath - The local path of the image to upload.
- * @param {object} options - Additional upload options for Cloudinary.
- * @returns {Promise<object>} - The Cloudinary upload result.
- */
+// Multer configuration
+const fileFilter = (
+  req: Express.Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  if (!file.mimetype.startsWith("image/")) {
+    cb(new Error("Only image files are allowed"));
+    return;
+  }
+  cb(null, true);
+};
+
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+});
+
+// Base upload function
+const uploadToCloudinary = async (
+  file: Express.Multer.File,
+  folder: string,
+  options: UploadApiOptions = {}
+): Promise<UploadApiResponse> => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        quality: "auto:good",
+        format: "auto",
+        transformation: [{ quality: "auto" }, { fetch_format: "auto" }],
+        ...options,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result as UploadApiResponse);
+      }
+    );
+    uploadStream.end(file.buffer);
+  });
+};
+
+// Profile photo upload
 export const uploadProfilePhoto = async (
-  filePath: string,
-  options: UploadApiOptions = {},
+  file: Express.Multer.File,
+  options: UploadApiOptions = {}
 ): Promise<UploadApiResponse> => {
   try {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: "Profile photos",
-      // Optimize without reducing quality
-      quality: "auto:good",
-      // Preserve original format
-      format: "auto",
-      // Maintain original resolution
-      transformation: [{ quality: "auto" }, { fetch_format: "auto" }],
-      ...options,
-    });
-    return result;
+    return await uploadToCloudinary(file, "Profile photos", options);
   } catch (error) {
     console.error("Error uploading profile photo:", error);
-    throw new Error("Failed to upload profile photo to Cloudinary.");
+    throw new Error("Failed to upload profile photo");
   }
 };
 
-/**
- * Uploads multiple product images to Cloudinary with optimization.
- * @param {string[]} filePaths - An array of local paths of images to upload.
- * @param {object} options - Additional upload options for Cloudinary.
- * @returns {Promise<object[]>} - An array of Cloudinary upload results.
- */
+// Product images upload
 export const uploadProductImages = async (
-  filePaths: string[],
-  options: UploadApiOptions = {},
+  files: Express.Multer.File[],
+  options: UploadApiOptions = {}
 ): Promise<UploadApiResponse[]> => {
   try {
-    const uploadPromises = filePaths.map((filePath) =>
-      cloudinary.uploader.upload(filePath, {
-        folder: "Products",
-        // Optimize without reducing quality
-        quality: "auto:good",
-        // Preserve original format
-        format: "auto",
-        // Maintain original resolution
-        transformation: [{ quality: "auto" }, { fetch_format: "auto" }],
-        ...options,
-      }),
+    const uploadPromises = files.map((file) =>
+      uploadToCloudinary(file, "Products", options)
     );
-    const results = await Promise.all(uploadPromises);
-    return results;
+    return await Promise.all(uploadPromises);
   } catch (error) {
     console.error("Error uploading product images:", error);
-    throw new Error("Failed to upload product images to Cloudinary.");
+    throw new Error("Failed to upload product images");
   }
 };
