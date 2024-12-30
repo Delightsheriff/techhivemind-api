@@ -12,12 +12,12 @@ cloudinary.config({
 
 
 const DEFAULT_OPTIONS: CloudinaryUploadOptions = {
-  quality: 'auto:good',
-  format: 'auto',
-  transformation: [
-    { quality: 'auto' },
-    { fetch_format: 'auto' }
-  ]
+  quality: 'auto',
+  fetch_format: 'auto',
+  transformation: [{
+    quality: 'auto',
+    fetch_format: 'auto'
+  }]
 };
 
 export const uploadToCloudinary = async (

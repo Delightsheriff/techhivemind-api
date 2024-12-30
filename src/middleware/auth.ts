@@ -7,6 +7,9 @@ import { User } from "../models/User";
 
 export interface AuthRequest extends Request {
   user?: IUser;
+  files?:
+    | Express.Multer.File[]
+    | { [fieldname: string]: Express.Multer.File[] };
 }
 
 export const protect = async (
@@ -35,7 +38,7 @@ export const protect = async (
         return next(createError(404, "User not found"));
       }
 
-      req.user = user.toObject();
+      req.user = user.toObject() as IUser;
       next();
     } catch (tokenError: any) {
       if (tokenError.name === "TokenExpiredError") {

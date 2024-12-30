@@ -15,14 +15,14 @@ app.set("trust proxy", 1);
 app.use(helmet());
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000","http://127.0.0.1:5500"],
   }),
 );
 app.use(apiLimiter);
 
 //Body Parser Middlewares
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(ExpressMongoSanitize());
 
 // Routes
@@ -33,11 +33,13 @@ app.get("/api/v1", (req: Request, res: Response) => {
   });
 });
 
+
 // auth routes
 app.use("/api/v1/auth", authRoutes);
 
 // user routes
 app.use("/api/v1/user", userRoutes);
+
 
 const catchAllHandler = (req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({
@@ -49,7 +51,7 @@ const catchAllHandler = (req: Request, res: Response, next: NextFunction) => {
 
 app.all("*", catchAllHandler);
 
-// Error Handler
+
 // Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error(err.stack);
@@ -63,11 +65,6 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     ...(ENVIRONMENT.APP.ENV === "development" && { stack: err.stack }),
   });
 });
-// app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-//   logger.error(err.stack);
-//   res
-//     .status(err.status || 500)
-//     .json({ error: err.message || "Internal Server Error" });
-// });
+
 
 export default app;

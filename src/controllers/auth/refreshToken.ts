@@ -4,7 +4,6 @@ import { deleteCache, setCache } from "../../common/utils/caching";
 import { createError } from "../../common/utils/error";
 import { verifyToken, generateTokens } from "../../common/utils/token";
 import { User } from "../../models/User";
-import { undefined } from "./auth.controller";
 
 
 export const refreshToken = async (

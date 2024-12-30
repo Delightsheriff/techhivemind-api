@@ -3,7 +3,6 @@ import { getCache, setCache } from "../../common/utils/caching";
 import { createError } from "../../common/utils/error";
 import { AuthRequest } from "../../middleware/auth";
 import { User } from "../../models/User";
-import { undefined } from "./auth.controller";
 
 
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {

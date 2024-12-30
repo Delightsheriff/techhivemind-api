@@ -5,7 +5,6 @@ import { createError } from "../../common/utils/error";
 import { generateTOTP } from "../../common/utils/otp";
 import { generateTokens } from "../../common/utils/token";
 import { User } from "../../models/User";
-import { undefined } from "./auth.controller";
 
 
 export const signIn = async (req: Request, res: Response) => {

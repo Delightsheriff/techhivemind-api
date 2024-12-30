@@ -4,7 +4,6 @@ import { getCache, setCache, deleteCache } from "../../common/utils/caching";
 import { createError } from "../../common/utils/error";
 import { AuthRequest } from "../../middleware/auth";
 import { User } from "../../models/User";
-import { undefined } from "./user.controller";
 
 
 export const updateUser = async (req: AuthRequest, res: Response) => {

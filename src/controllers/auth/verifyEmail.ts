@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { sendWelcomeEmail } from "../../common/services/email.service";
 import { createError } from "../../common/utils/error";
 import { User } from "../../models/User";
-import { undefined } from "./auth.controller";
 
 
 export const verifyEmail = async (req: Request, res: Response) => {
