@@ -18,7 +18,6 @@ export const updateProfilePicture = async (req: AuthRequest, res: Response) => {
     if (!photo) {
       throw createError(400, "No file uploaded");
     }
-    console.log('Received file:', photo);
     // Attempt to get user data from cache
     let user = await getCache(`user:${userId}`);
     // // Fetch from DB if not in cache
@@ -33,15 +32,21 @@ export const updateProfilePicture = async (req: AuthRequest, res: Response) => {
     }
     // // Upload the new image
     const uploadedImage = await uploadProfilePhoto(photo);
-    console.log('Uploaded image:', uploadedImage);
-    // // Update user's profile picture URL
-    user.profilePicture = uploadedImage.secure_url;
-    await user.save();
-    // // Update cache
-    await setCache(`user:${userId}`, user.toJSON(), 3600);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePicture: uploadedImage.secure_url },
+      { new: true },
+    );
+    if (!updatedUser) {
+      throw createError(500, "Failed to update profile picture");
+    }
+
+    // Update cache with the new user data
+    await setCache(`user:${userId}`, updatedUser.toJSON(), 3600);
     res.status(200).json({
       message: "Profile picture updated successfully",
-      profilePicture: uploadedImage.secure_url
+      data: { user: updatedUser },
     });
   } catch (error: any) {
     console.error('Error in updateProfilePicture:', error);
