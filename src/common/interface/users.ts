@@ -6,6 +6,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   isVerified: boolean;
+  termsAccepted: boolean;
   accountType: string;
   profilePicture?: string;
   emailVerificationOTP?: {

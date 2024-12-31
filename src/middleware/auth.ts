@@ -7,43 +7,49 @@ import { User } from "../models/User";
 
 export interface AuthRequest extends Request {
   user?: IUser;
+  files?:
+    | Express.Multer.File[]
+    | { [fieldname: string]: Express.Multer.File[] };
 }
 
 export const protect = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction,
-) => {
-  const authHeader = req.headers.authorization;
+  next: NextFunction
+): Promise<void> => {
   try {
+    const authHeader = req.headers.authorization;
+
     if (!authHeader?.startsWith("Bearer ")) {
       return next(createError(401, "No token provided"));
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = verifyToken(token, ENVIRONMENT.JWT.ACCESS);
-
-    const user = await User.findById(decoded._id).select("-password");
-    if (!user) {
-      return next(createError(404, "User not found -ty"));
+    
+    if (!token) {
+      return next(createError(401, "Invalid authorization format"));
     }
 
-    req.user = user.toObject();
-    next();
+    try {
+      const decoded = verifyToken(token, ENVIRONMENT.JWT.ACCESS);
+      const user = await User.findById(decoded._id).select("-password");
+
+      if (!user) {
+        return next(createError(404, "User not found"));
+      }
+
+      req.user = user.toObject() as IUser;
+      next();
+    } catch (tokenError: any) {
+      if (tokenError.name === "TokenExpiredError") {
+        return next(createError(401, "Token has expired"));
+      }
+      if (tokenError.name === "JsonWebTokenError") {
+        return next(createError(401, "Invalid token"));
+      }
+      return next(tokenError);
+    }
   } catch (error: any) {
-    if (error.name === "TokenExpiredError") {
-      return next(createError(401, "Token has expired"));
-    }
-    if (error.name === "JsonWebTokenError") {
-      return next(createError(401, "Invalid token"));
-    }
-
-    // Propagate other errors
-    next(
-      createError(
-        error.status || 500,
-        error.message || "Internal server error",
-      ),
-    );
+    return next(error);
   }
 };

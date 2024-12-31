@@ -7,3 +7,6 @@ node_modules/
 # Ignore log files
 *.log
 logs/
+
+# paste files
+*paste.ts

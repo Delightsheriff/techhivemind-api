@@ -60,3 +60,33 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
     throw new Error("Error sending welcome email");
   }
 };
+
+
+export const sendWelcomeVendor = async (email: string, name: string) => {
+  try {
+    await sendEmail({
+      to: email,
+      subject: "Welcome to TechHiveMind",
+      html: `
+     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f8f8; border-radius: 5px;">
+    <tr>
+      <td style="padding: 20px;">
+        <h1 style="color: #2c3e50; text-align: center;">TechHiveMind</h1>
+        <h2 style="color: #3498db; text-align: center;">Welcome to TechHiveMind as a Vendor!</h2>
+        <p style="font-size: 16px;">Hello ${name},</p>
+        <p style="font-size: 16px;">We are thrilled to welcome you as a new vendor on our platform! This is an exciting journey, and we're here to help you every step of the way.</p>
+        <p style="font-size: 16px;">If you have any questions, need assistance, or want to explore resources to maximize your success, please don't hesitate to reach out.</p>
+        <p style="font-size: 16px;">Best regards,<br>The TechHiveMind Team</p>
+      </td>
+    </tr>
+  </table>
+</div>`,
+    });
+
+    logger.info(`Welcome email sent to ${email}`);
+  } catch (error) {
+    logger.error("Error sending welcome email:", error);
+    throw new Error("Error sending welcome email");
+  }
+};
