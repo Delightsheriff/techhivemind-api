@@ -38,7 +38,7 @@ export const productSchema = Joi.object({
     "number.min": "Stock cannot be less than 0",
     "number.empty": "Stock is required",
   }),
-  onsale: Joi.boolean().messages({
+  onSale: Joi.boolean().messages({
     "boolean.base": "Onsale must be a boolean value",
   }),
   salePrice: Joi.number().min(0).precision(2).messages({

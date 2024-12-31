@@ -1,4 +1,5 @@
 import express, { Application, NextFunction, Request, Response } from "express";
+import { ENVIRONMENT } from "./common/config/environment";
 import helmet from "helmet";
 import cors from "cors";
 import { apiLimiter } from "./middleware/rateLimiter";
@@ -6,7 +7,7 @@ import ExpressMongoSanitize from "express-mongo-sanitize";
 import { logger } from "./common/utils/logger";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
-import { ENVIRONMENT } from "./common/config/environment";
+import productRoutes from "./routes/product.routes";  
 
 const app: Application = express();
 
@@ -39,6 +40,9 @@ app.use("/api/v1/auth", authRoutes);
 
 // user routes
 app.use("/api/v1/user", userRoutes);
+
+// product routes
+app.use("/api/v1/product", productRoutes);
 
 
 const catchAllHandler = (req: Request, res: Response, next: NextFunction) => {

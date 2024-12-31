@@ -6,7 +6,7 @@ export interface IProduct{
     description: string;
     category: string;
     stock: number;
-    onsale: boolean;
+    onSale: boolean;
     salePrice: number;
     images: string[];
     vendor: Types.ObjectId; // Reference to the vendor

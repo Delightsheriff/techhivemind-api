@@ -22,7 +22,7 @@ const productSchema = new Schema<IProduct>({
         type: Number,
         required: true
     },
-    onsale: {
+    onSale: {
         type: Boolean,
         default: false
     },
@@ -42,5 +42,9 @@ const productSchema = new Schema<IProduct>({
     
 
 }, { timestamps: true });
+
+
+productSchema.index({ category: 1, price: 1, onSale: 1 });
+productSchema.index({ createdAt: -1 });
 
 export const Product = mongoose.model<IProduct>("Product", productSchema);
