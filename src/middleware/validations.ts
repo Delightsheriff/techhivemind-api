@@ -41,8 +41,10 @@ export const validateProduct = (
   next: NextFunction,
 ) => {
   const { error } = productSchema.validate(req.body, { abortEarly: false });
+  console.log(req.body)
 
   if (error) {
+    console.log("Error in product validation");
     const errors = error.details.map((detail) => detail.message);
      res.status(400).json({ errors });
      return
