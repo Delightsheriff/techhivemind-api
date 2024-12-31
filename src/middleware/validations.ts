@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { signinSchema, signupSchema } from "../common/schemas/authSchema";
+import { productSchema } from "../common/schemas/productSchema";
 
 export const validateSignup = (
   req: Request,
@@ -31,4 +32,20 @@ export const validateSignin = (
   }
 
   next(); // Call next() only if validation succeeds
+};
+
+
+export const validateProduct = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { error } = productSchema.validate(req.body, { abortEarly: false });
+
+  if (error) {
+    const errors = error.details.map((detail) => detail.message);
+    return res.status(400).json({ errors });
+  }
+
+  next(); // Proceed if validation succeeds
 };
