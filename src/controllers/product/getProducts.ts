@@ -15,35 +15,17 @@ type ProductFilter = {
   onSale?: boolean;
 };
 
-/**
- * Retrieves a list of products based on the provided query parameters.
- * Supports filtering by category, pagination, and caching of results.
- *
- * @param req - The request object containing query parameters for category, page, and limit.
- * @param res - The response object used to send back the retrieved products or errors.
- *
- * Query Parameters:
- * - `category` (string): The category to filter products by. Special categories include "onsale" and "best_sellers".
- * - `page` (number, optional): The page number for pagination. Defaults to 1.
- * - `limit` (number, optional): The number of products per page. Defaults to 10.
- *
- * @throws {Error} If the category or pagination parameters are invalid.
- * @throws {Error} If there is an internal server error while fetching products.
- *
- * @returns {void} Sends a JSON response containing the list of products, total pages, and current page.
- */
-export const getProducts = async (req: Request, res: Response) => {
+export const getProducts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { category, page = 1, limit = 12 } = req.query;
 
     const pageNumber = parseInt(page as string, 10);
     const limitNumber = parseInt(limit as string, 10);
 
-    const categoryError = validateCategory(category as string);
-    if (categoryError) {
-      throw createError(400, "Invalid category provided");
-    }
-
+    // Validate pagination parameters
     const { error: paginationError, value } = validatePagination(
       pageNumber,
       limitNumber
@@ -54,17 +36,25 @@ export const getProducts = async (req: Request, res: Response) => {
 
     const { page: validatedPage, limit: validatedLimit } = value;
 
-    let filter: ProductFilter = {}; // Initialize filter with the correct type
+    // Handle category validation
+    if (category) {
+      const categoryError = validateCategory(category as string);
+      if (categoryError) {
+        throw createError(400, "Invalid category provided");
+      }
+    }
+
+    let filter: ProductFilter = {}; // Initialize filter object
 
     // Set filter based on category
     if (category === "onsale") {
-      filter = getOnSaleFilter(); // Filter products that are on sale
+      filter = getOnSaleFilter();
     } else if (category === "best_sellers") {
-      const bestSellers = await getBestSellers(); // Get best-selling products
-      res.json({ products: bestSellers }); // Directly return best sellers
-    } else if (typeof category === "string") {
-      // Ensure it's a string
-      filter.category = category; // Filter by specific product category
+      const bestSellers = await getBestSellers();
+      res.status(200).json({ products: bestSellers });
+      return;
+    } else if (category) {
+      filter.category = category as string;
     }
 
     // Create a unique cache key based on category, page, and limit
@@ -74,9 +64,12 @@ export const getProducts = async (req: Request, res: Response) => {
 
     // Attempt to get data from the cache
     const cachedProducts = await getCache(cacheKey);
+
     if (cachedProducts) {
-      console.log("Returning cached products");
-      res.json({ products: JSON.parse(cachedProducts) }); // Return cached data
+      res
+        .status(200)
+        .json({ cachedProducts, message: "Returning cached products" });
+      return;
     }
 
     // Fetch products from the database with pagination and filtering
@@ -92,6 +85,7 @@ export const getProducts = async (req: Request, res: Response) => {
       products,
       totalPages: Math.ceil(totalCount / validatedLimit),
       currentPage: validatedPage,
+      message: "Returning products from database",
     };
 
     // Cache the response data for 1 hour (3600 seconds)

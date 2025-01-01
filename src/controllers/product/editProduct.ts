@@ -29,7 +29,7 @@ export const editProduct = async (req: AuthRequest, res: Response) => {
         field: detail.path[0],
         message: detail.message,
       }));
-      return res.status(400).json({
+      res.status(400).json({
         error: "Validation failed",
         errors: validationErrors,
       });
