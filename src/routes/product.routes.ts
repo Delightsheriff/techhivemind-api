@@ -4,6 +4,7 @@ import { createProduct } from "../controllers/product/createProduct";
 import { protect } from "../middleware/auth";
 import { upload } from "../middleware/upload";
 import { getSingleProduct } from "../controllers/product/getSingleProduct";
+import { myProducts } from "../controllers/product/myProducts";
 
 const router = Router();
 
@@ -16,5 +17,7 @@ router.post(
   upload.array("images", 5),
   createProduct
 );
+
+router.get("/my-products", protect, myProducts);
 
 export default router;
