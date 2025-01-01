@@ -7,11 +7,11 @@ import { Product } from "../../models/Product";
 import { uploadProductImages } from "../../common/services/upload.service";
 import { productSchema } from "../../common/schemas/productSchema";
 
-export const createProduct = async (req: AuthRequest, res: Response) => {
+export const editProduct = async (req: AuthRequest, res: Response) => {
   try {
-    // console.log("Create product request received");
     const userId = req.user?._id;
-    const product = req.body;
+    const productId = req.params.id;
+    const updates = req.body;
     const files = req.files as Express.Multer.File[];
 
     if (!userId) {
@@ -19,7 +19,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
     }
 
     // Validate request body
-    const { error, value } = productSchema.validate(product, {
+    const { error, value } = productSchema.validate(updates, {
       abortEarly: false,
       stripUnknown: true,
     });
@@ -29,15 +29,14 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
         field: detail.path[0],
         message: detail.message,
       }));
-      // Return validation errors in response directly
-      res.status(400).json({
+      return res.status(400).json({
         error: "Validation failed",
         errors: validationErrors,
       });
     }
 
     // Use validated and sanitized data
-    const validatedProduct = value;
+    const validatedUpdates = value;
 
     let user = await getCache(`user:${userId}`);
     if (!user) {
@@ -53,21 +52,35 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       throw createError(403, "Forbidden, you are not a vendor");
     }
 
-    const uploadedImages = await uploadProductImages(files);
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw createError(404, "Product not found");
+    }
 
-    const newProduct = await Product.create({
-      ...validatedProduct,
-      vendor: userId,
-      images: uploadedImages,
-    });
+    if (product.vendor.toString() !== userId) {
+      throw createError(
+        403,
+        "Forbidden, you are not the owner of this product"
+      );
+    }
 
-    const savedProduct = await newProduct.save();
-    const cacheKey = `products:${savedProduct.category}:page=1:limit=10`;
+    // Handle file uploads if any
+    if (files && files.length > 0) {
+      const uploadedImages = await uploadProductImages(files);
+      validatedUpdates.images = uploadedImages;
+    }
+
+    // Update the product
+    Object.assign(product, validatedUpdates);
+    const updatedProduct = await product.save();
+
+    // Invalidate relevant cache
+    const cacheKey = `products:${updatedProduct.category}:page=1:limit=10`;
     await deleteCache(cacheKey);
 
-    res.status(201).json({
-      message: "Product created successfully!",
-      product: savedProduct,
+    res.status(200).json({
+      message: "Product updated successfully!",
+      product: updatedProduct,
     });
   } catch (error: any) {
     const status = error.status || 500;
