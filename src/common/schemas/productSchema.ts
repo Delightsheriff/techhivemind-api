@@ -1,66 +1,3 @@
-// import Joi from "joi";
-
-// export const productSchema = Joi.object({
-//   name: Joi.string().trim().min(2).max(100).required().messages({
-//     "string.empty": "Product name is required",
-//     "string.min": "Product name must be at least 2 characters long",
-//     "string.max": "Product name cannot exceed 100 characters",
-//   }),
-//   price: Joi.number().positive().precision(2).required().messages({
-//     "number.base": "Price must be a number",
-//     "number.positive": "Price must be greater than 0",
-//     "number.empty": "Price is required",
-//   }),
-//   description: Joi.string().trim().min(10).max(1000).required().messages({
-//     "string.empty": "Description is required",
-//     "string.min": "Description must be at least 10 characters long",
-//     "string.max": "Description cannot exceed 1000 characters",
-//   }),
-//   category: Joi.string()
-//     .valid(
-//       "computers",
-//       "tablets",
-//       "drones_&_cameras",
-//       "smartphones",
-//       "headphones",
-//       "speakers",
-//       "wearable_tech",
-//       "tv_&home_cinema"
-//     )
-//     .required()
-//     .messages({
-//       "any.only": "Category must be one of the predefined values",
-//       "string.empty": "Category is required",
-//     }),
-//   stock: Joi.number().integer().min(0).required().messages({
-//     "number.base": "Stock must be a number",
-//     "number.integer": "Stock must be an integer",
-//     "number.min": "Stock cannot be less than 0",
-//     "number.empty": "Stock is required",
-//   }),
-//   onSale: Joi.boolean().optional().messages({
-//     "boolean.base": "Onsale must be a boolean value",
-//   }),
-//   salePrice: Joi.number().optional().min(0).precision(2).messages({
-//     "number.base": "Sale price must be a number",
-//     "number.min": "Sale price cannot be less than 0",
-//   }),
-//   // images: Joi.array()
-//   //   .items(
-//   //     Joi.any().required().messages({
-//   //       "any.required": "Each image file is required.",
-//   //     })
-//   //   )
-//   //   .min(1)
-//   //   .required()
-//   //   .messages({
-//   //     "array.min": "At least one image is required",
-//   //     "array.base": "Images must be an array of file objects",
-//   //     "any.required": "Images are required",
-//   //   }),
-// });
-
-
 import Joi from "joi";
 
 export const productSchema = Joi.object({
@@ -69,17 +6,7 @@ export const productSchema = Joi.object({
     "string.min": "Product name must be at least 2 characters long",
     "string.max": "Product name cannot exceed 100 characters",
   }),
-  price: Joi.number().positive().precision(2).required().custom((value, helpers) => {
-    // Handle string input
-    if (typeof value === 'string') {
-      const parsed = parseFloat(value);
-      if (isNaN(parsed)) {
-        return helpers.error('number.base');
-      }
-      return parsed;
-    }
-    return value;
-  }).messages({
+  price: Joi.number().positive().precision(2).required().messages({
     "number.base": "Price must be a number",
     "number.positive": "Price must be greater than 0",
     "number.empty": "Price is required",
@@ -105,43 +32,16 @@ export const productSchema = Joi.object({
       "any.only": "Category must be one of the predefined values",
       "string.empty": "Category is required",
     }),
-  stock: Joi.number().integer().min(0).required().custom((value, helpers) => {
-    // Handle string input
-    if (typeof value === 'string') {
-      const parsed = parseInt(value, 10);
-      if (isNaN(parsed)) {
-        return helpers.error('number.base');
-      }
-      return parsed;
-    }
-    return value;
-  }).messages({
+  stock: Joi.number().integer().min(0).required().messages({
     "number.base": "Stock must be a number",
     "number.integer": "Stock must be an integer",
     "number.min": "Stock cannot be less than 0",
     "number.empty": "Stock is required",
   }),
-  onSale: Joi.boolean().optional().custom((value, helpers) => {
-    if (typeof value === 'string') {
-      if (value.toLowerCase() === 'true') return true;
-      if (value.toLowerCase() === 'false') return false;
-      return helpers.error('boolean.base');
-    }
-    return value;
-  }).messages({
+  onSale: Joi.boolean().optional().messages({
     "boolean.base": "Onsale must be a boolean value",
   }),
-  salePrice: Joi.number().optional().min(0).precision(2).custom((value, helpers) => {
-    // Handle string input
-    if (typeof value === 'string') {
-      const parsed = parseFloat(value);
-      if (isNaN(parsed)) {
-        return helpers.error('number.base');
-      }
-      return parsed;
-    }
-    return value;
-  }).messages({
+  salePrice: Joi.number().optional().min(0).precision(2).messages({
     "number.base": "Sale price must be a number",
     "number.min": "Sale price cannot be less than 0",
   }),

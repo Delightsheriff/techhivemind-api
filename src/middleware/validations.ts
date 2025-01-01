@@ -5,7 +5,7 @@ import { productSchema } from "../common/schemas/productSchema";
 export const validateSignup = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): void => {
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
 
@@ -21,7 +21,7 @@ export const validateSignup = (
 export const validateSignin = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const { error } = signinSchema.validate(req.body, { abortEarly: false });
 
@@ -32,23 +32,4 @@ export const validateSignin = (
   }
 
   next(); // Call next() only if validation succeeds
-};
-
-
-export const validateProduct = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  const { error } = productSchema.validate(req.body, { abortEarly: false });
-  console.log(req.body)
-
-  if (error) {
-    console.log("Error in product validation");
-    const errors = error.details.map((detail) => detail.message);
-     res.status(400).json({ errors });
-     return
-  }
-
-  next(); // Proceed if validation succeeds
 };

@@ -1,5 +1,10 @@
 import { Request, Response } from "express";
-import { getBestSellers, getOnSaleFilter, validateCategory, validatePagination } from "../../common/utils/products";
+import {
+  getBestSellers,
+  getOnSaleFilter,
+  validateCategory,
+  validatePagination,
+} from "../../common/utils/products";
 import { createError } from "../../common/utils/error";
 import { Product } from "../../models/Product";
 import { getCache, setCache } from "../../common/utils/caching";
@@ -29,47 +34,49 @@ type ProductFilter = {
  */
 export const getProducts = async (req: Request, res: Response) => {
   try {
-  const { category, page = 1, limit = 12 } = req.query;
+    const { category, page = 1, limit = 12 } = req.query;
 
-  const pageNumber = parseInt(page as string, 10);
-  const limitNumber = parseInt(limit as string, 10);
+    const pageNumber = parseInt(page as string, 10);
+    const limitNumber = parseInt(limit as string, 10);
 
-  const categoryError = validateCategory(category as string);
-  if (categoryError) {
-    throw createError(400, "Invalid category provided");
-  }
+    const categoryError = validateCategory(category as string);
+    if (categoryError) {
+      throw createError(400, "Invalid category provided");
+    }
 
-  const { error: paginationError, value } = validatePagination(pageNumber, limitNumber);
-  if (paginationError) {
-    throw createError(400, "Invalid pagination parameters");
-  }
+    const { error: paginationError, value } = validatePagination(
+      pageNumber,
+      limitNumber
+    );
+    if (paginationError) {
+      throw createError(400, "Invalid pagination parameters");
+    }
 
-  const { page: validatedPage, limit: validatedLimit } = value;
+    const { page: validatedPage, limit: validatedLimit } = value;
 
-  let filter: ProductFilter = {}; // Initialize filter with the correct type
+    let filter: ProductFilter = {}; // Initialize filter with the correct type
 
-  // Set filter based on category
-  if (category === "onsale") {
-    filter = getOnSaleFilter(); // Filter products that are on sale
-  } else if (category === "best_sellers") {
-    const bestSellers = await getBestSellers(); // Get best-selling products
-    res.json({ products: bestSellers }); // Directly return best sellers
-    
-  }else if (typeof category === 'string') { // Ensure it's a string
-    filter.category = category; // Filter by specific product category
-  }
+    // Set filter based on category
+    if (category === "onsale") {
+      filter = getOnSaleFilter(); // Filter products that are on sale
+    } else if (category === "best_sellers") {
+      const bestSellers = await getBestSellers(); // Get best-selling products
+      res.json({ products: bestSellers }); // Directly return best sellers
+    } else if (typeof category === "string") {
+      // Ensure it's a string
+      filter.category = category; // Filter by specific product category
+    }
 
-  
     // Create a unique cache key based on category, page, and limit
-    const cacheKey = `products:${category || "all"}:page=${validatedPage}:limit=${validatedLimit}`;
+    const cacheKey = `products:${
+      category || "all"
+    }:page=${validatedPage}:limit=${validatedLimit}`;
 
     // Attempt to get data from the cache
     const cachedProducts = await getCache(cacheKey);
     if (cachedProducts) {
       console.log("Returning cached products");
-    res.json(
-       { products: JSON.parse(cachedProducts)}
-        ); // Return cached data
+      res.json({ products: JSON.parse(cachedProducts) }); // Return cached data
     }
 
     // Fetch products from the database with pagination and filtering
@@ -92,7 +99,6 @@ export const getProducts = async (req: Request, res: Response) => {
 
     // Return the response
     res.status(200).json(response);
-
   } catch (error: any) {
     console.error("Error in getProducts:", error);
     res.status(error.status || 500).json({
