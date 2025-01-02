@@ -14,14 +14,17 @@ const cartItemSchema = new Schema<IcartItem>({
   },
 });
 
-const cartSchema = new Schema({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+const cartSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    cartItems: [cartItemSchema],
   },
-  cartItems: [cartItemSchema],
-});
+  { timestamps: true }
+);
 
 // Virtual for dynamic total calculation (recommended)
 cartSchema.virtual("total").get(async function () {
