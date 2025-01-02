@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { signinSchema, signupSchema } from "../common/schemas/authSchema";
+import { productSchema } from "../common/schemas/productSchema";
 
 export const validateSignup = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): void => {
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
 
@@ -20,7 +21,7 @@ export const validateSignup = (
 export const validateSignin = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const { error } = signinSchema.validate(req.body, { abortEarly: false });
 
