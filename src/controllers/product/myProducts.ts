@@ -9,7 +9,7 @@ export const myProducts = async (req: AuthRequest, res: Response) => {
     const userId = req.user?._id;
 
     // Fetch the user's role from the database
-    const user = await User.findById(userId).select("role");
+    const user = await User.findById(userId).select("accountType");
     if (!user) {
       throw createError(404, "User not found");
     }
