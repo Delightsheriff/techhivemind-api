@@ -22,6 +22,10 @@ const cartSchema = new Schema(
       required: true,
     },
     cartItems: [cartItemSchema],
+    total: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
