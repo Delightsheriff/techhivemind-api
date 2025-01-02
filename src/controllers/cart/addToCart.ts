@@ -24,7 +24,7 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      res.status(404).json({ error: "Product not found" });
     }
 
     let cart = await Cart.findOne({ user: userId });
@@ -43,7 +43,7 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
     }
     await cart.save();
 
-    return res.status(200).json({ message: "Added to cart", cart: cart._id });
+    res.status(200).json({ message: "Added to cart", cart: cart._id });
   } catch (error: any) {
     console.error("Error in addToCart:", error);
     res.status(error.status || 500).json({
