@@ -24,10 +24,10 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
     );
 
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      res.status(404).json({ message: "Cart not found" });
     }
 
-    return res.status(200).json({ message: "Item removed from cart", cart });
+    res.status(200).json({ message: "Item removed from cart", cart });
   } catch (error: any) {
     console.error("Error in removeFromCart:", error);
     res.status(error.status || 500).json({
