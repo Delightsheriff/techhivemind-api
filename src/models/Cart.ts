@@ -30,13 +30,13 @@ const cartSchema = new Schema(
   { timestamps: true }
 );
 
-// Virtual for dynamic total calculation (recommended)
-cartSchema.virtual("total").get(async function () {
+// Virtual for calculated total
+cartSchema.virtual("calculatedTotal").get(async function () {
   let total = 0;
   for (const item of this.cartItems) {
     const product = await mongoose.model("Product").findById(item.product);
     if (product) {
-      total += product.price * item.quantity; // Assuming 'price' is in your Product schema
+      total += product.price * item.quantity;
     }
   }
   return total;
