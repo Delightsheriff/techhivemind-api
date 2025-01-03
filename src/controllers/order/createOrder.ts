@@ -7,10 +7,9 @@ import { Product } from "../../models/Product";
 import { Order } from "../../models/Order";
 
 export const createOrder = async (req: AuthRequest, res: Response) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     const userId = req.user?._id;
     const { cartId, shippingAddress } = req.body;
 
@@ -74,13 +73,18 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       totalAmount += product.price * item.quantity;
     }
 
-    const order = await Order.create({
-      userId,
-      orderItems,
-      totalAmount,
-      shippingAddress,
-      status: "pending",
-    });
+    const order = await Order.create(
+      [
+        {
+          userId,
+          orderItems,
+          totalAmount,
+          shippingAddress,
+          status: "pending",
+        },
+      ],
+      { session }
+    );
 
     cart.cartItems.splice(0, cart.cartItems.length);
     cart.total = 0;
@@ -93,5 +97,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     res.status(error.status || 500).json({
       error: error.message || "Internal server error",
     });
+  } finally {
+    session.endSession();
   }
 };
