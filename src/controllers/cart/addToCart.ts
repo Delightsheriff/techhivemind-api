@@ -17,7 +17,6 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
       throw createError(400, "Product ID is required");
     }
 
-    // Validate quantity (optional)
     if (quantity <= 0) {
       throw createError(400, "Invalid quantity, please enter a positive value");
     }
@@ -27,26 +26,28 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
       res.status(404).json({ error: "Product not found" });
     }
 
-    let cart = await Cart.findOne({ user: userId });
+    let cart = await Cart.findOne({ userId });
+
     if (!cart) {
-      cart = await Cart.create({ user: userId, cartItems: [] });
+      cart = await Cart.create({ userId, cartItems: [] });
     }
 
-    const existingItem = cart.cartItems.find(
+    const existingItemIndex = cart.cartItems.findIndex(
       (item) => item.product.toString() === productId
     );
 
-    if (existingItem) {
-      existingItem.quantity += quantity;
+    if (existingItemIndex !== -1) {
+      cart.cartItems[existingItemIndex].quantity += quantity;
     } else {
       cart.cartItems.push({ product: productId, quantity });
     }
-    await cart.save();
 
-    res.status(200).json({ message: "Added to cart", cart: cart._id });
+    await cart.save();
+    res.status(200).json({ message: "Added to cart", cart: cart._id }); // Early return here too
   } catch (error: any) {
     console.error("Error in addToCart:", error);
     res.status(error.status || 500).json({
+      // Return here to prevent double sending
       error: error.message || "Internal server error",
     });
   }

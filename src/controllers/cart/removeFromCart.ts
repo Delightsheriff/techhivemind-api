@@ -7,7 +7,7 @@ import { Cart } from "../../models/Cart";
 export const removeFromCart = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?._id;
-    const { productId } = req.params; // Get productId from params
+    const { productId } = req.body; // Get productId from params
 
     if (!userId) {
       throw createError(401, "Unauthorized, please sign in");
@@ -18,7 +18,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
     }
 
     const cart = await Cart.findOneAndUpdate(
-      { user: userId },
+      { userId },
       { $pull: { cartItems: { product: productId } } }, // Remove matching item
       { new: true }
     );

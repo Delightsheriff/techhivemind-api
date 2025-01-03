@@ -9,7 +9,7 @@ const router = Router();
 
 router.post("/add", protect, addToCart); // Add to cart
 router.get("/get", protect, getAllCartItems); // Get all cart items
-router.delete("/:productId", protect, removeFromCart); // Remove from cart
-router.patch("/:productId", protect, updateCartItem); // Update cart item quantity
+router.delete("/", protect, removeFromCart); // Remove from cart
+router.patch("/", protect, updateCartItem); // Update cart item quantity
 
 export default router;

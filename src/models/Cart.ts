@@ -42,4 +42,12 @@ cartSchema.virtual("calculatedTotal").get(async function () {
   return total;
 });
 
+// Pre-save hook to update total
+cartSchema.pre("save", async function (next) {
+  if (this.isModified("cartItems")) {
+    this.total = await this.get("calculatedTotal");
+  }
+  next();
+});
+
 export const Cart = mongoose.model("Cart", cartSchema);

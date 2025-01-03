@@ -14,7 +14,9 @@ async function updateAndSaveWishlist(
     if (!wishlist.products.includes(productId)) {
       wishlist.products.push(productId);
       await wishlist.save();
-      res.status(200).json({ message: "Product added to wishlist", wishlist });
+      res
+        .status(200)
+        .json({ message: "Product added to wishlist", wishlist: wishlist._id });
     } else {
       res
         .status(200)
@@ -49,7 +51,9 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
 
     if (!wishlist) {
       wishlist = await Wishlist.create({ userId, products: [productId] });
-      res.status(200).json({ message: "Product added to wishlist", wishlist });
+      res
+        .status(200)
+        .json({ message: "Product added to wishlist", wishlist: wishlist._id });
     } else {
       updateAndSaveWishlist(wishlist, productId, res); // Use the helper function
     }

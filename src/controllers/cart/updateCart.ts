@@ -4,11 +4,14 @@ import { Cart } from "../../models/Cart";
 import { AuthRequest } from "../../middleware/auth";
 
 // Update cart item quantity
-export const updateCartItem = async (req: AuthRequest, res: Response) => {
+export const updateCartItem = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
   try {
     const userId = req.user?._id;
-    const { productId } = req.params;
-    const { quantity } = req.body;
+
+    const { quantity, productId } = req.body;
 
     if (!userId) {
       throw createError(401, "Unauthorized, please sign in");
@@ -18,34 +21,66 @@ export const updateCartItem = async (req: AuthRequest, res: Response) => {
       throw createError(400, "Product ID and quantity are required");
     }
 
+    // First, check if cart exists, if not create it
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+      cart = new Cart({ userId, cartItems: [] });
+    }
+
     if (quantity <= 0) {
-      // Handle removal logic *within* this controller
-      const cart = await Cart.findOneAndUpdate(
-        { user: userId },
+      // Handle removal logic
+      cart = await Cart.findOneAndUpdate(
+        { userId },
         { $pull: { cartItems: { product: productId } } },
         { new: true }
       );
-      if (!cart) {
-        res.status(404).json({ message: "Cart not found" });
-      }
+
       res.status(200).json({ message: "Item removed from cart", cart });
+      return;
     }
 
-    const cart = await Cart.findOneAndUpdate(
-      { user: userId, "cartItems.product": productId },
-      { $set: { "cartItems.$.quantity": quantity } },
-      { new: true }
+    // Check if product exists in cart
+    const productExists = cart.cartItems.some(
+      (item) => item.product.toString() === productId
     );
 
-    if (!cart) {
-      res.status(404).json({ message: "Cart or item not found" });
+    let updatedCart;
+    if (productExists) {
+      // Update existing item
+      updatedCart = await Cart.findOneAndUpdate(
+        { userId, "cartItems.product": productId },
+        { $set: { "cartItems.$.quantity": quantity } },
+        { new: true }
+      );
+    } else {
+      // Add new item
+      updatedCart = await Cart.findOneAndUpdate(
+        { userId },
+        {
+          $push: {
+            cartItems: {
+              product: productId,
+              quantity,
+            },
+          },
+        },
+        { new: true, upsert: true }
+      );
     }
 
-    res.status(200).json({ message: "Cart item updated", cart });
+    if (!updatedCart) {
+      throw createError(500, "Failed to update cart");
+    }
+
+    res
+      .status(200)
+      .json({ message: "Cart updated successfully", cart: updatedCart });
+    return;
   } catch (error: any) {
     console.error("Error in updateCartItem:", error);
     res.status(error.status || 500).json({
       error: error.message || "Internal server error",
     });
+    return;
   }
 };

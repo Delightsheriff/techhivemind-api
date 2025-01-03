@@ -18,7 +18,9 @@ export const getAllWishlistItems = async (req: AuthRequest, res: Response) => {
       res.status(200).json({ message: "Wishlist is empty", wishlist: [] }); // return empty array if no wishlist
     }
 
-    res.status(200).json(wishlist);
+    res
+      .status(200)
+      .json({ wishlist, message: "Wishlist items retrieved successfully" });
   } catch (error: any) {
     console.error("Error in getAllWishlistItems:", error);
     res.status(error.status || 500).json({
