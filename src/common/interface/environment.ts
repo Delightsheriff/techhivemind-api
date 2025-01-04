@@ -4,9 +4,7 @@ export interface IEnvironment {
     PORT?: number;
     ENV?: string;
     CLIENT?: string;
-  };
-  CLIENT: {
-    URL?: string;
+    API?: string;
   };
   DB: {
     URI: string;
@@ -28,5 +26,9 @@ export interface IEnvironment {
     NAME: string;
     API_KEY: string;
     API_SECRET: string;
+  };
+  PAYSTACK: {
+    API_SECRET: string;
+    URL: string;
   };
 }

@@ -8,6 +8,10 @@ import { logger } from "./common/utils/logger";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import productRoutes from "./routes/product.routes";
+import cartRoutes from "./routes/cart.routes";
+import wishlistRoutes from "./routes/wishlist.routes";
+import orderRoutes from "./routes/orders.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 const app: Application = express();
 
@@ -46,6 +50,18 @@ app.use("/api/v1/user", userRoutes);
 
 // product routes
 app.use("/api/v1/product", productRoutes);
+
+// cart routes
+app.use("/api/v1/cart", cartRoutes);
+
+// wishlist routes
+app.use("/api/v1/wishlist", wishlistRoutes);
+
+// order routes
+app.use("/api/v1/order", orderRoutes);
+
+// payment routes
+app.use("/api/v1/payment", paymentRoutes);
 
 const catchAllHandler = (req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({

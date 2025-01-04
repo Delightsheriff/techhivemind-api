@@ -7,10 +7,8 @@ export const ENVIRONMENT: IEnvironment = {
     NAME: process.env.APP_NAME,
     PORT: parseInt(process.env.PORT || "2024"),
     ENV: process.env.NODE_ENV,
-    CLIENT: process.env.CLIENT,
-  },
-  CLIENT: {
-    URL: process.env.CLIENT_URL!,
+    CLIENT: process.env.CLIENT_URL,
+    API: process.env.API_URL,
   },
   DB: {
     URI: process.env.MONGO_URI!,
@@ -32,5 +30,9 @@ export const ENVIRONMENT: IEnvironment = {
     NAME: process.env.CLOUDINARY_CLOUD_NAME!,
     API_KEY: process.env.CLOUDINARY_API_KEY!,
     API_SECRET: process.env.CLOUDINARY_API_SECRET!,
+  },
+  PAYSTACK: {
+    API_SECRET: process.env.PAYSTACK_SECRET!,
+    URL: process.env.PAYSTACK_URL!,
   },
 };
