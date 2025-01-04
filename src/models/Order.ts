@@ -42,7 +42,7 @@ const orderSchema = new Schema<IOrder>(
       ],
       default: "pending",
     },
-    paymentRef: {
+    paymentReference: {
       type: String,
     },
     shippingAddress: {

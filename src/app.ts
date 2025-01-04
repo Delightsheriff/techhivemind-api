@@ -11,6 +11,7 @@ import productRoutes from "./routes/product.routes";
 import cartRoutes from "./routes/cart.routes";
 import wishlistRoutes from "./routes/wishlist.routes";
 import orderRoutes from "./routes/orders.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 const app: Application = express();
 
@@ -58,6 +59,9 @@ app.use("/api/v1/wishlist", wishlistRoutes);
 
 // order routes
 app.use("/api/v1/order", orderRoutes);
+
+// payment routes
+app.use("/api/v1/payment", paymentRoutes);
 
 const catchAllHandler = (req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({

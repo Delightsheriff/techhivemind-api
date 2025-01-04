@@ -11,7 +11,7 @@ export interface IOrder {
   totalAmount: number;
   userId: Types.ObjectId;
   status: string;
-  paymentRef: string;
+  paymentReference: string;
   shippingAddress: {
     street: string;
     city: string;
