@@ -6,7 +6,6 @@ import { generateTOTP } from "../../common/utils/otp";
 import { generateTokens } from "../../common/utils/token";
 import { User } from "../../models/User";
 
-
 export const signIn = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
