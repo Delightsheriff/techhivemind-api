@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { createError } from "../../common/utils/error";
 import { Cart } from "../../models/Cart";
+import { calculateCartTotal } from "../../common/utils/cart";
 
 // Remove item from cart
 export const removeFromCart = async (req: AuthRequest, res: Response) => {
@@ -25,6 +26,11 @@ export const removeFromCart = async (req: AuthRequest, res: Response) => {
 
     if (!cart) {
       res.status(404).json({ message: "Cart not found" });
+    }
+
+    if (cart) {
+      cart.total = await calculateCartTotal(cart);
+      await cart.save();
     }
 
     res.status(200).json({ message: "Item removed from cart", cart });

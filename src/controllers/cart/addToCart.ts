@@ -3,6 +3,7 @@ import { AuthRequest } from "../../middleware/auth";
 import { createError } from "../../common/utils/error";
 import { Product } from "../../models/Product";
 import { Cart } from "../../models/Cart";
+import { calculateCartTotal } from "../../common/utils/cart";
 
 export const addToCart = async (req: AuthRequest, res: Response) => {
   try {
@@ -29,7 +30,7 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
-      cart = await Cart.create({ userId, cartItems: [] });
+      cart = await Cart.create({ userId, cartItems: [], total: 0 });
     }
 
     const existingItemIndex = cart.cartItems.findIndex(
@@ -41,7 +42,7 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
     } else {
       cart.cartItems.push({ product: productId, quantity });
     }
-
+    cart.total = await calculateCartTotal(cart);
     await cart.save();
     res.status(200).json({ message: "Added to cart", cart: cart._id }); // Early return here too
   } catch (error: any) {

@@ -30,24 +30,4 @@ const cartSchema = new Schema(
   { timestamps: true }
 );
 
-// Virtual for calculated total
-cartSchema.virtual("calculatedTotal").get(async function () {
-  let total = 0;
-  for (const item of this.cartItems) {
-    const product = await mongoose.model("Product").findById(item.product);
-    if (product) {
-      total += product.price * item.quantity;
-    }
-  }
-  return total;
-});
-
-// Pre-save hook to update total
-cartSchema.pre("save", async function (next) {
-  if (this.isModified("cartItems")) {
-    this.total = await this.get("calculatedTotal");
-  }
-  next();
-});
-
 export const Cart = mongoose.model("Cart", cartSchema);

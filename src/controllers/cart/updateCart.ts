@@ -2,6 +2,7 @@ import { Response } from "express";
 import { createError } from "../../common/utils/error";
 import { Cart } from "../../models/Cart";
 import { AuthRequest } from "../../middleware/auth";
+import { calculateCartTotal } from "../../common/utils/cart";
 
 // Update cart item quantity
 export const updateCartItem = async (
@@ -71,6 +72,8 @@ export const updateCartItem = async (
     if (!updatedCart) {
       throw createError(500, "Failed to update cart");
     }
+    updatedCart.total = await calculateCartTotal(updatedCart);
+    await updatedCart.save();
 
     res
       .status(200)
