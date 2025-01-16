@@ -7,7 +7,7 @@ import { Wishlist } from "../../models/Wishlist";
 export const removeFromWishlist = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?._id;
-    const { productId } = req.params;
+    const { productId } = req.body;
 
     if (!userId) {
       throw createError(401, "Unauthorized, please sign in");

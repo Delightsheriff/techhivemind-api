@@ -6,8 +6,8 @@ import { protect } from "../middleware/auth";
 
 const router = Router();
 
-router.post("/", protect, addToWishlist);
-router.get("/", protect, getAllWishlistItems);
-router.delete("/:productId", protect, removeFromWishlist);
+router.post("/add", protect, addToWishlist);
+router.get("/get", protect, getAllWishlistItems);
+router.delete("/remove", protect, removeFromWishlist);
 
 export default router;
