@@ -5,6 +5,7 @@ import { createError } from "../../common/utils/error";
 import { Cart } from "../../models/Cart";
 import { Product } from "../../models/Product";
 import { Order } from "../../models/Order";
+import { calculateCartTotal } from "../../common/utils/cart";
 
 export const createOrder = async (req: AuthRequest, res: Response) => {
   const session = await mongoose.startSession();
@@ -13,67 +14,54 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     const userId = req.user?._id;
     const { cartId, shippingAddress } = req.body;
 
-    if (!userId) {
-      throw createError(401, "Unauthorized, please sign in");
-    }
-    if (!cartId) {
-      throw createError(400, "Cart ID is required");
-    }
-    if (!shippingAddress) {
+    if (!userId) throw createError(401, "Unauthorized, please sign in");
+    if (!cartId) throw createError(400, "Cart ID is required");
+    if (!shippingAddress)
       throw createError(400, "Shipping address is required");
-    }
 
+    // Fetch cart with populated product details
     const cart = await Cart.findById(cartId)
       .populate("cartItems.product")
       .session(session);
-
-    // Handle missing cart
-    if (!cart) {
-      await session.abortTransaction();
-      res.status(404).json({ message: "Cart not found" });
-      return;
-    }
-
-    if (cart.cartItems.length === 0) {
-      await session.abortTransaction();
-      res.status(400).json({ message: "Cart is empty" });
+    if (!cart) throw createError(404, "Cart not found");
+    if (cart.cartItems.length === 0) throw createError(400, "Cart is empty");
+    if (cart.userId.toString() !== userId.toString()) {
+      throw createError(403, "Unauthorized access to cart");
     }
 
     const orderItems = [];
-    let totalAmount = 0;
+    const productsToUpdate = [];
 
+    // Validate stock and prepare updates
     for (const item of cart.cartItems) {
       const product = await Product.findById(item.product._id).session(session);
-
-      // Handle missing product
       if (!product) {
-        await session.abortTransaction();
-        res
-          .status(404)
-          .json({ message: `Product with ID ${item.product._id} not found` });
-        return; // Exit the function if product is not found
+        throw createError(404, `Product ${item.product._id} not found`);
       }
 
       if (product.stock < item.quantity) {
-        await session.abortTransaction();
-        res.status(400).json({
-          message: `Insufficient stock for product ${product.name}. Available: ${product.stock}`,
-        });
-        return; // Exit the function if insufficient stock
+        throw createError(
+          400,
+          `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`
+        );
       }
-
-      product.stock -= item.quantity;
-      await product.save({ session });
 
       orderItems.push({
         product: item.product._id,
         quantity: item.quantity,
         price: product.price,
       });
-      totalAmount += product.price * item.quantity;
+
+      // Update product stock directly
+      product.stock -= item.quantity;
+      productsToUpdate.push(product.save({ session }));
     }
 
-    const order = await Order.create(
+    // Calculate total using the helper function
+    const totalAmount = await calculateCartTotal(cart);
+
+    // Create order
+    const [order] = await Order.create(
       [
         {
           userId,
@@ -86,12 +74,27 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       { session }
     );
 
-    cart.cartItems.splice(0, cart.cartItems.length);
-    cart.total = 0;
-    await cart.save({ session });
+    // Wait for all product updates to complete
+    await Promise.all(productsToUpdate);
+
+    // Clear cart
+    await Cart.findByIdAndUpdate(
+      cartId,
+      { $set: { cartItems: [], total: 0 } },
+      { session }
+    );
+
     await session.commitTransaction();
 
-    res.status(201).json({ message: "Order created successfully", order });
+    res.status(201).json({
+      success: true,
+      message: "Order created successfully",
+      order: {
+        orderId: order._id,
+        totalAmount,
+        status: order.status,
+      },
+    });
   } catch (error: any) {
     console.error("Error in createOrder:", error);
     res.status(error.status || 500).json({
