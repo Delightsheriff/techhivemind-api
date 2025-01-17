@@ -22,7 +22,7 @@ export class PaymentService {
           body: JSON.stringify({
             email,
             amount: order.totalAmount * 100, // Convert to kobo
-            callback_url: `${ENVIRONMENT.APP.API}/payment/verify`,
+            callback_url: `${ENVIRONMENT.APP.CLIENT}/order/verify`,
             metadata: {
               orderId: order._id,
               userId: order.userId,
@@ -70,7 +70,9 @@ export class PaymentService {
       const { orderId } = data.metadata;
 
       if (data.status === "success") {
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(orderId).populate(
+          "orderItems.product"
+        );
 
         if (order) {
           order.status = "paid";
@@ -80,7 +82,8 @@ export class PaymentService {
           return {
             success: true,
             message: "Payment verified successfully",
-            data,
+            ...data,
+            order,
           };
         }
       }

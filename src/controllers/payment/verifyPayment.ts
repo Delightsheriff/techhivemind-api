@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import { createError } from "../../common/utils/error";
 import { PaymentService } from "../../common/services/payment.service";
+import { formatReceiptData } from "../../common/utils/payment";
 
 export const verifyPayment = async (req: AuthRequest, res: Response) => {
   try {
@@ -13,19 +14,17 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
     const verificationResult = await paymentService.verifyPayment(
       reference as string
     );
-    console.log(verificationResult);
     if (verificationResult.success) {
-      // Payment successful
+      const receiptData = formatReceiptData(verificationResult);
+
       res.status(200).json({
         message: "Payment verified successfully",
-        verificationResult,
-        // order: verificationResult.order,
-      }); // Send success response with order data
+        receipt: receiptData,
+      });
     } else {
-      // Payment failed
       res.status(400).json({
         error: verificationResult.message || "Payment verification failed",
-      }); // Send error response
+      });
     }
   } catch (error: any) {
     console.error("Error in verifyPayment:", error);
