@@ -6,7 +6,7 @@ import { formatReceiptData } from "../../common/utils/payment";
 
 export const verifyPayment = async (req: AuthRequest, res: Response) => {
   try {
-    const { reference } = req.query;
+    const { reference } = req.body;
     if (!reference) {
       throw createError(400, "Payment Reference is required");
     }
