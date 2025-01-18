@@ -6,6 +6,6 @@ import { verifyPayment } from "../controllers/payment/verifyPayment";
 const router = Router();
 
 router.post("/initialize", protect, initializePayment);
-router.get("/verify", protect, verifyPayment);
+router.post("/verify", protect, verifyPayment);
 
 export default router;
