@@ -39,7 +39,7 @@ interface ReceiptResponse {
 export const formatReceiptData = (verificationResult: any): ReceiptResponse => {
   const { order, currency, fees, paid_at, reference, authorization } =
     verificationResult;
-
+  const convertedfee = fees / 100;
   const products: ReceiptProduct[] = order.orderItems.map((item: any) => ({
     name: item.product.name,
     quantity: item.quantity,
@@ -67,8 +67,8 @@ export const formatReceiptData = (verificationResult: any): ReceiptResponse => {
     products,
     paymentSummary: {
       subtotal: order.totalAmount,
-      processingFee: fees,
-      total: order.totalAmount + fees,
+      processingFee: convertedfee,
+      total: order.totalAmount + convertedfee,
       currency,
     },
   };
