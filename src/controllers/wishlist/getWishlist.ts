@@ -4,7 +4,10 @@ import { createError } from "../../common/utils/error";
 import { Wishlist } from "../../models/Wishlist";
 
 // Get all wishlist items for a user
-export const getAllWishlistItems = async (req: AuthRequest, res: Response) => {
+export const getAllWishlistItems = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
   try {
     const userId = req.user?._id;
 
@@ -15,7 +18,8 @@ export const getAllWishlistItems = async (req: AuthRequest, res: Response) => {
     const wishlist = await Wishlist.findOne({ userId }).populate("products");
 
     if (!wishlist) {
-      res.status(200).json({ message: "Wishlist is empty", wishlist: [] }); // return empty array if no wishlist
+      res.status(200).json({ message: "Wishlist is empty", wishlist: [] });
+      return;
     }
 
     res
