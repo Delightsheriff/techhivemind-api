@@ -10,7 +10,12 @@ import { getSingleProduct } from "../controllers/product/getSingleProduct";
 const router = Router();
 
 router.get("/one-product/:id", getSingleProduct);
-router.patch("/update-product/:id", protect, editProduct);
+router.patch(
+  "/update-product/:id",
+  protect,
+  upload.array("images", 5),
+  editProduct
+);
 
 router.get("/products", getProducts);
 
