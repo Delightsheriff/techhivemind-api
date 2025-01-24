@@ -20,12 +20,12 @@ export const productSchema = Joi.object({
     .valid(
       "computers",
       "tablets",
-      "drones_&_cameras",
+      "drones_cameras",
       "smartphones",
       "headphones",
       "speakers",
       "wearable_tech",
-      "tv_&home_cinema"
+      "tv_home_cinema"
     )
     .required()
     .messages({
