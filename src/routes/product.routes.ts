@@ -6,6 +6,7 @@ import { upload } from "../middleware/upload";
 import { myProducts } from "../controllers/product/myProducts";
 import { editProduct } from "../controllers/product/editProduct";
 import { getSingleProduct } from "../controllers/product/getSingleProduct";
+import { searchProducts } from "../controllers/product/searchProducts";
 
 const router = Router();
 
@@ -27,5 +28,7 @@ router.post(
 );
 
 router.get("/my-products", protect, myProducts);
+
+router.get("/search", searchProducts);
 
 export default router;
