@@ -23,7 +23,6 @@ export const initializePayment = async (req: AuthRequest, res: Response) => {
 
     const paymentService = new PaymentService();
     const paymentData = await paymentService.initializePayment(order, email);
-    console.log(paymentData);
 
     res.status(200).json({
       authorization_url: paymentData.authorization_url,
