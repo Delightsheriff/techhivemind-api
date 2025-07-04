@@ -6,7 +6,7 @@ This is the backend API for the TechHiveMind e-commerce platform.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/techhivemind-api.git
+   git clone https://github.com/Delightsheriff/techhivemind-api
    cd techhivemind-api
    ```
 
